@@ -7,6 +7,7 @@
 #include <map>
 
 #define INPUT_FILE_NAME "e_nfa.txt"
+#define EPSILON '-'
 
 using namespace std;
 
@@ -31,20 +32,23 @@ public:
             initialState(std::move(initialState)) {}
 
     void showQuintuple() {
-        cout << "DFA:\n";
-        cout << "Q ==> ";
+        cout << "-------- DFA Quintuple --------\n";
+        cout << "Q ==> { ";
         for (const string &state: states) {
             cout << state << ' ';
         }
-        cout << "\ninitial state ==> " << initialState << '\n';
-        cout << "final states ==> ";
+        cout << "}\n";
+        cout << "initial state ==> " << initialState << '\n';
+        cout << "final states ==> { ";
         for (const string &state: finalStates) {
             cout << state << ' ';
         }
-        cout << "\ntransition function ==>\n";
+        cout << "}\n";
+        cout << "transition function ==>\n";
         for (auto [key, value]: transitions) {
-            cout << key.first << ", " << key.second << " -> " << value << '\n';
+            cout << key.first << "\t\t" << key.second << "\t->\t" << value << '\n';
         }
+        cout << "-------------------------------\n";
     }
 };
 
@@ -69,7 +73,7 @@ public:
             initialState(std::move(initialState)) {}
 
     DFA toDFA() {
-        set<string> dfaStates, dfaFinalStates, nextState;
+        set<string> dfaStates, dfaFinalStates;
         map<pair<string, char>, string> dfaTransitions;
         string state;
         dfaStates.insert(states.begin(), states.end());
@@ -99,7 +103,7 @@ public:
                         if (k.second != symbol) continue;
                         for (const string &value: values) {
                             k2 = make_pair(value, symbol);
-                            for (const string& s: transitions[k2]) {
+                            for (const string &s: transitions[k2]) {
                                 if (state.contains(s)) continue;
                                 state += s;
                             }
@@ -109,10 +113,6 @@ public:
                 dfaTransitions[k1] = state;
             }
         }
-        cout << "DFA TRANSITIONS ==>\n";
-        for (auto [k, v]: dfaTransitions) {
-            cout << k.first << ", " << k.second << " -> " << v << endl;
-        }
         return DFA{
                 symbols, dfaStates, dfaFinalStates,
                 dfaTransitions, initialState
@@ -120,22 +120,27 @@ public:
     }
 
     void showQuintuple() {
-        cout << "NFA:\n";
-        cout << "Q ==> ";
+        cout << "-------- NFA Quintuple --------\n";
+        cout << "Q ==> { ";
         for (const string &state: states) {
             cout << state << ' ';
         }
-        cout << "\ninitial state ==> " << initialState << '\n';
-        cout << "final states ==> ";
+        cout << "}\n";
+        cout << "initial state ==> " << initialState << '\n';
+        cout << "final states ==> { ";
         for (const string &state: finalStates) {
             cout << state << ' ';
         }
-        cout << "\ntransition function ==>\n";
+        cout << "}\n";
+        cout << "transition function ==>\n";
         for (auto [key, value]: transitions) {
-            cout << key.first << ", " << key.second << " -> ";
-            for (const string &v: value) cout << v << ' ';
-            cout << endl;
+            cout << key.first << "\t" << key.second << "\t->\t";
+            for (const string &v: value) {
+                cout << v << ' ';
+            }
+            cout << '\n';
         }
+        cout << "-------------------------------\n";
     }
 };
 
@@ -148,7 +153,7 @@ class EpsilonNfa {
 
     void epsilonClosure(const string &state, set<string> &closure) {
         closure.insert(state);
-        pair<string, char> key = make_pair(state, '-');
+        pair<string, char> key = make_pair(state, EPSILON);
         if (!transitions.contains(key))
             return;
         for (const string &x: transitions[key]) {
@@ -249,10 +254,36 @@ public:
                 nfaTransitions, initialState
         };
     }
+
+    void showQuintuple() {
+        cout << "------- E-NFA Quintuple -------\n";
+        cout << "Q ==> { ";
+        for (const string &state: states) {
+            cout << state << ' ';
+        }
+        cout << "}\n";
+        cout << "initial state ==> " << initialState << '\n';
+        cout << "final states ==> { ";
+        for (const string &state: finalStates) {
+            cout << state << ' ';
+        }
+        cout << "}\n";
+        cout << "transition function ==>\n";
+        for (auto [key, value]: transitions) {
+            cout << key.first << "\t" << key.second << "\t->\t";
+            for (const string &v: value) {
+                cout << v << ' ';
+            }
+            cout << '\n';
+        }
+        cout << "-------------------------------\n";
+    }
+
 };
 
 int main() {
     auto epsilonNfa = EpsilonNfa();
+    epsilonNfa.showQuintuple();
     auto nfa = epsilonNfa.toNFA();
     nfa.showQuintuple();
     auto dfa = nfa.toDFA();
