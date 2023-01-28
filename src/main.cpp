@@ -64,6 +64,26 @@ public:
         readFile();
     }
 
+    void showQuintuple() {
+        cout << "Q: ";
+        for (const string &state: states) {
+            cout << state << ' ';
+        }
+        cout << "\ninitial state = " << initialState << '\n';
+        cout << "final states: ";
+        for (const string &state: finalStates) {
+            cout << state << ' ';
+        }
+        cout << "\ntransition function:\n";
+        for (auto [key, value]: transitions) {
+            cout << key.first << ", " << key.second << " -> ";
+            for (auto v: value) {
+                cout << v << ' ';
+            }
+            cout << endl;
+        }
+    }
+
     set<string> getEpsilonClosure(const string &state, char input) {
         set<string> atEpsilon;
         atEpsilon = epsilon(state, atEpsilon);
@@ -100,26 +120,6 @@ public:
             return epsilon(s, epsilonStates);
         }
         return epsilonStates;
-    }
-
-    void showQuintuple() {
-        cout << "Q: ";
-        for (const string &state: states) {
-            cout << state << ' ';
-        }
-        cout << "\ninitial state = " << initialState << '\n';
-        cout << "final states: ";
-        for (const string &state: finalStates) {
-            cout << state << ' ';
-        }
-        cout << "\ntransition function:\n";
-        for (auto [key, value]: transitions) {
-            cout << key.first << ", " << key.second << " -> ";
-            for (auto v: value) {
-                cout << v << ' ';
-            }
-            cout << endl;
-        }
     }
 };
 
