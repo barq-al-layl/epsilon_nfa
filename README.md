@@ -8,3 +8,7 @@ a file consists on a quintuple for a specifc e-nfa, the file structure as follow
 - 3rd line ==> initial state or start state.
 - 4th line ==> F (set of all final states or accepted states seprated by spaces).
 - the rest is the transition function ==> [state] [input symbol] [next state].
+
+# Program output
+- The quintuple for equivalent NFA & DFA.
+- Epsilon closure for each state.
