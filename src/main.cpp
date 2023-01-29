@@ -279,6 +279,19 @@ public:
         cout << "-------------------------------\n";
     }
 
+    void epsilonClosures() {
+        cout << "--------- E Closures ----------\n";
+        set<string> closure;
+        for (const string &state: states) {
+            closure = set<string>();
+            epsilonClosure(state, closure);
+            cout << state << "\t==>\t\t";
+            for (const string &x: closure)
+                cout << x << ' ';
+            cout << '\n';
+        }
+        cout << "-------------------------------\n";
+    };
 };
 
 int main() {
@@ -288,4 +301,5 @@ int main() {
     nfa.showQuintuple();
     auto dfa = nfa.toDFA();
     dfa.showQuintuple();
+    epsilonNfa.epsilonClosures();
 }
