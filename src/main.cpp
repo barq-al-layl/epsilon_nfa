@@ -75,37 +75,35 @@ public:
     DFA toDFA() {
         set<string> dfaStates, dfaFinalStates;
         map<pair<string, char>, string> dfaTransitions;
-        string state;
         dfaStates.insert(states.begin(), states.end());
         for (auto [key, value]: transitions) {
             if (value.size() < 2) continue;
-            state = "";
+            string state;
             for (const string &str: value)
                 state += str;
             dfaStates.insert(state);
         }
-        for (const string &fs: finalStates) {
-            for (const string &ds: dfaStates) {
-                if (ds.contains(fs))
-                    dfaFinalStates.insert(ds);
+        for (const string &finalState: finalStates) {
+            for (const string &dfaState: dfaStates) {
+                if (dfaState.contains(finalState))
+                    dfaFinalStates.insert(dfaState);
             }
         }
-        pair<string, char> k1, k2;
         for (char symbol: symbols) {
             for (const string &dfaState: dfaStates) {
-                k1 = make_pair(dfaState, symbol);
-                state = "";
+                pair<string, char> k1 = make_pair(dfaState, symbol);
+                string state;
                 for (const string &str: transitions[k1]) {
                     state += str;
                 }
                 if (state.empty()) {
-                    for (auto [k, values]: transitions) {
-                        if (k.second != symbol) continue;
+                    for (auto [key, values]: transitions) {
+                        if (key.second != symbol) continue;
                         for (const string &value: values) {
-                            k2 = make_pair(value, symbol);
-                            for (const string &s: transitions[k2]) {
-                                if (state.contains(s)) continue;
-                                state += s;
+                            pair<string, char> k2 = make_pair(value, symbol);
+                            for (const string &x: transitions[k2]) {
+                                if (state.contains(x)) continue;
+                                state += x;
                             }
                         }
                     }
@@ -154,30 +152,20 @@ class EpsilonNfa {
     void epsilonClosure(const string &state, set<string> &closure) {
         closure.insert(state);
         pair<string, char> key = make_pair(state, EPSILON);
-        if (!transitions.contains(key))
-            return;
         for (const string &x: transitions[key]) {
-            closure.insert(x);
             epsilonClosure(x, closure);
         }
     }
 
     set<string> statesAtInput(const string &state, char input) {
-        set<string> atEpsilon;
-        epsilonClosure(state, atEpsilon);
-        atEpsilon.insert(state);
-        pair<string, char> key;
-        set<string> atInput;
-        for (const string &epsilon: atEpsilon) {
-            key = make_pair(epsilon, input);
-            for (const string &x: transitions[key]) {
-                atInput.insert(x);
-            }
+        set<string> closure, atInput, result;
+        epsilonClosure(state, closure);
+        for (const string &epsilon: closure) {
+            pair<string, char> key = make_pair(epsilon, input);
+            atInput.insert(transitions[key].begin(), transitions[key].end());
         }
-        set<string> result;
         for (const string &x: atInput) {
             epsilonClosure(x, result);
-            result.insert(x);
         }
         return result;
     }
@@ -226,11 +214,10 @@ public:
     }
 
     NFA toNFA() {
-        pair<string, char> key;
         map<pair<string, char>, set<string>> nfaTransitions;
-        set<string> nfaFinalStates, closures, temp, temp2;
+        set<string> nfaFinalStates;
         for (const string &state: states) {
-            closures = set<string>();
+            set<string> closures;
             epsilonClosure(state, closures);
             for (const string &finaleState: finalStates) {
                 if (closures.contains(finaleState)) {
@@ -239,12 +226,12 @@ public:
             }
             for (const string &closure: closures) {
                 for (char symbol: symbols) {
-                    key = make_pair(closure, symbol);
-                    temp = statesAtInput(closure, symbol);
-                    for (const string &x: temp) {
-                        temp2 = set<string>();
-                        epsilonClosure(x, temp2);
-                        nfaTransitions[key].insert(temp2.begin(), temp2.end());
+                    pair<string, char> key = make_pair(closure, symbol);
+                    set<string> atInput = statesAtInput(closure, symbol);
+                    for (const string &x: atInput) {
+                        set<string> temp;
+                        epsilonClosure(x, temp);
+                        nfaTransitions[key].insert(temp.begin(), temp.end());
                     }
                 }
             }
@@ -281,9 +268,8 @@ public:
 
     void epsilonClosures() {
         cout << "--------- E Closures ----------\n";
-        set<string> closure;
         for (const string &state: states) {
-            closure = set<string>();
+            set<string> closure;
             epsilonClosure(state, closure);
             cout << state << "\t==>\t\t";
             for (const string &x: closure)
